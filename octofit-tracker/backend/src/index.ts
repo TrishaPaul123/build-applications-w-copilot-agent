@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import db from './config/database.js';
+import mongoose from 'mongoose';
 import usersRouter from './api/users.js';
 import teamsRouter from './api/teams.js';
 import activitiesRouter from './api/activities.js';
@@ -40,16 +40,30 @@ app.use('/api/activities', activitiesRouter);
 app.use('/api/leaderboard', leaderboardRouter);
 app.use('/api/workouts', workoutsRouter);
 
-// Start server
-app.listen(port, () => {
-  console.log(`🚀 Backend server running on port ${port}`);
-  console.log(`📍 API Base URL: ${baseUrl}`);
-  console.log(`🗄️  MongoDB connection: mongodb://localhost:27017/octofit_db`);
-  console.log(`\nAvailable endpoints:`);
-  console.log(`  GET  /api/health`);
-  console.log(`  GET  /api/users`);
-  console.log(`  GET  /api/teams`);
-  console.log(`  GET  /api/activities`);
-  console.log(`  GET  /api/leaderboard`);
-  console.log(`  GET  /api/workouts`);
-});
+// Start server after database connection
+async function startServer() {
+  const connectionString = process.env.MONGODB_URI || 'mongodb://localhost:27017/octofit_db';
+  
+  try {
+    await mongoose.connect(connectionString);
+    console.log('Connected to octofit_db');
+    
+    app.listen(port, () => {
+      console.log(`🚀 Backend server running on port ${port}`);
+      console.log(`📍 API Base URL: ${baseUrl}`);
+      console.log(`🗄️  MongoDB connection: mongodb://localhost:27017/octofit_db`);
+      console.log(`\nAvailable endpoints:`);
+      console.log(`  GET  /api/health`);
+      console.log(`  GET  /api/users`);
+      console.log(`  GET  /api/teams`);
+      console.log(`  GET  /api/activities`);
+      console.log(`  GET  /api/leaderboard`);
+      console.log(`  GET  /api/workouts`);
+    });
+  } catch (error) {
+    console.error('Error connecting to octofit_db:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
